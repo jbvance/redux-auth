@@ -1,6 +1,6 @@
 import React from'react';
 
-export function renderField(field) {  
+export function renderField(field) {
   const { meta } = field;
   //to destructure further you could do:
   // const { meta: { touched, error }} = field; and remove remove references
