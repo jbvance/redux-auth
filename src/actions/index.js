@@ -44,7 +44,7 @@ export function signupUser({ email, password }) {
   };
 }
 
-export function authError(error) {  
+export function authError(error) {
   return {
     type: AUTH_ERROR,
     payload: error
@@ -63,10 +63,10 @@ export function fetchMessage() {
       headers: { authorization: localStorage.getItem('token') }
     })
       .then(response => {
-        dispatch({
-          type: FETCH_MESSAGE,
-          payload: response.data.message
-        });
+        console.log(response);
+      })
+      .catch(error => {
+        console.log("ERR:", error.response);
       });
-  };
+  }
 }
