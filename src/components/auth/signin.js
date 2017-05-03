@@ -1,42 +1,58 @@
 import React, { Component } from 'react';
-import { reduxForm } from 'redux-form';
+import { connect } from 'react-redux';
+import { Field, reduxForm } from 'redux-form';
 import * as actions from '../../actions';
+import { renderField, renderAlert } from '../helpers/render_helpers';
 
 class Signin extends Component {
 
-  handleFormSubmit({email, password}){
-    console.log(email, password);
-    this.props.signinUser({ email, password });
-  }
-
-  renderAlert() {
-      if (this.props.errorMessage){
-        return (
-          <div className="alert alert-danger">
-            <strong>Oops! </strong>{this.props.errorMessage}
-          </div>
-        )
-      }
+  handleFormSubmit(values){
+    this.props.signinUser({ email: values.email, password: values.password });
   }
 
   render() {
-    const { handleSubmit, fields: { email, password }} = this.props;
+    const { handleSubmit } = this.props;
 
     return (
       <form onSubmit={handleSubmit(this.handleFormSubmit.bind(this))}>
-        <fieldset className="form-group">
-          <label>Email:</label>
-          <input {...email} className="form-control" />
-        </fieldset>
-        <fieldset className="form-group">
-          <label>Password:</label>
-          <input {...password} type="password" className="form-control" />
-        </fieldset>
-        {this.renderAlert()}
+        <Field
+          label="Email"
+          name="email"
+          inputType="text"
+          component={renderField}
+        />
+        <Field
+          label="Password"
+          name="password"
+          inputType="password"
+          component={renderField}
+        />
+      {renderAlert(this.props)}
         <button action="submit" className="btn btn-primary">Sign in</button>
       </form>
     );
   }
+}
+
+function validate(values){
+  // (ex) values equals an object with form values - {title: 'New Post', categories: 'camping, boating', content: 'this is my new post content'}
+  // The erros object returned is automatically add to the meta.errors of the field object
+  // in renderfield(field)
+  //The properties in the errors object MUST MATCH the 'name' attribute in the <Field> component
+  const errors = {};
+
+  //Validate the inputs from 'values' object
+  if (!values.email){
+    errors.email = "Please enter an email address";
+  }
+
+  if (!values.password){
+    errors.password = "Please enter a password";
+  }
+
+  //If errors is empty, redux-form assumes the form is valid and ok to submit.
+  //otherwise, it assumes validation failed.
+  return errors;
 }
 
 function mapStateToProps(state) {
@@ -44,6 +60,8 @@ function mapStateToProps(state) {
 }
 
 export default reduxForm({
-  form: 'signin',
-  fields: ['email', 'password']
-}, mapStateToProps, actions)(Signin);
+  validate: validate,
+  form: 'signin'
+})(
+  connect(mapStateToProps, actions)(Signin)
+);

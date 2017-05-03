@@ -1,46 +1,48 @@
 import React, { Component } from 'react';
-import { reduxForm } from 'redux-form';
+import { connect } from 'react-redux';
+import { Field, reduxForm } from 'redux-form';
 import * as actions from '../../actions';
+import { renderField, renderAlert } from '../helpers/render_helpers';
 
 class Signup extends Component {
+
+  handleFormSubmit(values){
+    this.props.signinUser({ email: values.email, password: values.password });
+  }
+
   handleFormSubmit(formProps){
     //Call action creator to sign up the user
     this.props.signupUser(formProps);
   }
 
-  renderAlert(){
-    if (this.props.errorMessage){
-      return (
-        <div className="alert alert-danger">
-          <strong>Oops! </strong>{this.props.errorMessage}
-        </div>
-      )
-    }
-  }
 
   render() {
     //TODO refactor input fields into a function to prevent repeating same code three times
-    const  { handleSubmit, fields: { email, password, passwordConfirm }} = this.props;
+    const  { handleSubmit } = this.props;
     return (
       <form onSubmit={handleSubmit(this.handleFormSubmit.bind(this))}>
-        <fieldset className="form-group">
-        <label>Email:</label>
-        <input className="form-control" {...email } />
-        {email.touched && email.error && <div className="error">{email.error}</div>}
-        </fieldset>
+        <Field
+          label="Email"
+          name="email"
+          inputType="text"
+          component={renderField}
+        />
 
-        <fieldset className="form-group">
-        <label>Password:</label>
-        <input type="password" className="form-control" {...password } />
-        {password.touched && password.error && <div className="error">{password.error}</div>}
-        </fieldset>
+        <Field
+          label="Password"
+          name="password"
+          inputType="password"
+          component={renderField}
+        />
 
-        <fieldset className="form-group">
-        <label>Confirm Password:</label>
-        <input type="password" className="form-control" {...passwordConfirm } />
-        {passwordConfirm.touched && passwordConfirm.error && <div className="error">{passwordConfirm.error}</div>}
-        </fieldset>
-        { this.renderAlert() }
+        <Field
+          label="Confirm Password"
+          name="passwordConfirm"
+          inputType="password"
+          component={renderField}
+        />
+
+      { renderAlert(this.props) }
         <button action="submit" className="btn btn-primary">Sign Up </button>
       </form>
     );
@@ -65,8 +67,7 @@ function validate(formProps) {
   if (formProps.password !== formProps.passwordConfirm){
     errors.password = 'Passwords must match';
   }
-
- //console.log("ERRORS", errors);
+ 
   return errors;
 }
 
@@ -75,7 +76,8 @@ function mapStateToProps(state){
 }
 
 export default reduxForm({
-  form: 'signup',
-  fields: ['email', 'password', 'passwordConfirm'],
-  validate: validate
-}, mapStateToProps, actions)(Signup);
+  validate: validate,
+  form: 'signup'
+})(
+  connect(mapStateToProps, actions)(Signup)
+);
